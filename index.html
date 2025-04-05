@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spiritual Dashboard</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6a11cb;
+      --secondary: #2575fc;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --text-light: #f8f9fa;
+      --text-dark: #495057;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-bg-dark: rgba(30, 30, 30, 0.9);
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --border-radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text-dark);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      transition: all 0.3s ease;
+    }
+
+    body.dark-mode {
+      background: linear-gradient(135deg, #121212, #1a1a1a);
+      color: var(--text-light);
+    }
+
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: column;
+      gap: 30px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 30px;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+
+    .dark-mode .card {
+      background: var(--card-bg-dark);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .dark-mode .card-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dark-mode .card-title {
+      color: var(--secondary);
+    }
+
+    .card-action {
+      color: var(--primary);
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .card-action:hover {
+      color: var(--secondary);
+      transform: translateX(3px);
+    }
+
+    .dark-mode .card-action {
+      color: var(--secondary);
+    }
+
+    .dark-mode .card-action:hover {
+      color: var(--primary);
+    }
+
+    /* Iframe Containers */
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+    }
+
+    .iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Quick Access Bar */
+    .quick-access {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-left: 20px;
+      margin-right: 20px;
+      margin-top: 30px;
+      margin-bottom: 30px;
+      width: 92%;
+      overflow: hidden;
+    }
+
+    .quick-access-btn {
+      flex: 1;
+      min-width: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      height: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      text-decoration: none;
+      color: var(--text-dark);
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
+      padding: 5px;
+    }
+
+    .dark-mode .quick-access-btn {
+      background: var(--card-bg-dark);
+      color: var(--text-light);
+    }
+
+    .quick-access-btn i {
+      font-size: 1.0rem;
+    }
+
+    .quick-access-btn span {
+      font-size: 0.5rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      text-align: center;
+    }
+
+    .quick-access-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      color: var(--primary);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .dark-mode .bottom-nav {
+      background: var(--card-bg-dark);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 0.8rem;
+      gap: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode .nav-btn {
+      color: var(--text-light);
+    }
+
+    .nav-btn i {
+      font-size: 1.2rem;
+    }
+
+    .nav-btn.active, .nav-btn:hover {
+      color: var(--primary);
+    }
+
+    .dark-mode .nav-btn.active, 
+    .dark-mode .nav-btn:hover {
+      color: var(--secondary);
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 15px;
+      right: 30px;
+      width: 0px;
+      height: 0px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      border: none;
+      color: var(--text-dark);
+    }
+
+    .dark-mode .theme-toggle {
+      color: var(--text-light);
+    }
+
+    /* More Menu Popup */
+    .more-menu {
+      position: fixed;
+      bottom: 70px;
+      right: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 1100;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 180px;
+    }
+
+    .more-menu.show {
+      display: flex;
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .more-menu a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-dark);
+      padding: 8px 12px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .dark-mode .more-menu a {
+      color: var(--text-light);
+    }
+
+    .more-menu a:hover {
+      background: rgba(var(--primary), 0.1);
+      transform: translateX(5px);
+    }
+
+    .more-menu a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .more-menu a span {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .dark-mode .more-menu {
+      background: var(--card-bg-dark);
+    }
+
+    /* Menu item animations */
+    .more-menu.show a {
+      animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .more-menu.show a:nth-child(1) { animation-delay: 0.1s; }
+    .more-menu.show a:nth-child(2) { animation-delay: 0.2s; }
+    .more-menu.show a:nth-child(3) { animation-delay: 0.3s; }
+    .more-menu.show a:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Iframe Slider */
+    .iframe-slider-container {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .iframe-slider {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .iframe-slide {
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      width: 100%;
+      position: relative;
+    }
+
+    .slide-title {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .dashboard {
+        grid-template-columns: repeat(1, 1fr);
+      }
+      
+      .card.wide {
+        grid-column: span 1;
+      }
+      
+      .iframe-container {
+        height: 350px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .dashboard {
+        grid-template-columns: repeat(1, 1fr);
+      }
+      
+      .card.wide {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" onclick="toggleMode()">
+    <i class="fas fa-moon"></i>
+  </button>
+
+
+
+    <!-- Quick Access Bar -->
+    <div class="quick-access wide">
+      <a href="https://skadigitalhub.github.io/24-7Tv/" target="_blank" class="quick-access-btn">
+        <i class="fas fa-tv"></i>
+        <span>TV</span>
+      </a>
+      <a href="https://skadigitalhub.github.io/iradio/" target="_blank" class="quick-access-btn">
+        <i class="fas fa-broadcast-tower"></i>
+        <span>Radio</span>
+      </a>
+      <a href="https://www.socialcreator.com/skalink" target="_blank" class="quick-access-btn">
+        <i class="fas fa-users"></i>
+        <span>Join</span>
+      </a>
+      <a href="https://www.socialcreator.com/skalink/?s=306415" target="_blank" class="quick-access-btn">
+        <i class="fas fa-video"></i>
+        <span>Stream</span>
+      </a>
+      <a href="https://skadigitalhub.github.io/Audioplaylist/" target="_blank" class="quick-access-btn">
+        <i class="fas fa-music"></i>
+        <span>Audios</span>
+      </a>
+      <a href="https://skadigitalhub.github.io/Testimonyform/" target="_blank" class="quick-access-btn">
+        <i class="fa-solid fa-hands-holding fa-beat"></i>
+        <span>Testify</span>
+      </a>
+    </div>
+
+    <!-- Update Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-bell fa-beat"></i>
+          <span>UPDATE</span>
+        </div>
+        <a href="https://www.socialcreator.com/skalink/?s=306599" target="_blank" class="card-action">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="iframe-container">
+        <iframe seamless frameborder="0" scrolling="auto" src="https://www.socialcreator.com/skalink/?s=306599"></iframe>
+      </div>
+    </div>
+
+    <!-- Devotional Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-book-bible"></i>
+          <span>DEVOTIONAL</span>
+        </div>
+        <a href="https://www.socialcreator.com/skalink/?s=307606" target="_blank" class="card-action">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="iframe-container">
+        <iframe seamless frameborder="0" scrolling="auto" src="https://www.socialcreator.com/skalink/?s=307606"></iframe>
+      </div>
+    </div>
+
+    <!-- Testimony Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fa-solid fa-hands-holding"></i>
+          <span>TESTIMONY</span>
+        </div>
+        <a href="https://www.socialcreator.com/skalink/?s=306702" target="_blank" class="card-action">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="iframe-container">
+        <iframe seamless frameborder="0" scrolling="auto" src="https://www.socialcreator.com/skalink/?s=306702"></iframe>
+      </div>
+    </div>
+
+    <!-- Schedule Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-calendar-alt"></i>
+          <span>SCHEDULE</span>
+        </div>
+        <a href="https://calendar.google.com/calendar/embed?height=400&wkst=1&ctz=Etc%2FGMT&showPrint=0&showNav=0&mode=AGENDA&title=Church%20Event%20&showTitle=0&showTz=0&showTabs=0&showCalendars=0&src=Z2xvcmlvdXNyb3lhbHdvcmRjaXRhZGVsQGdtYWlsLmNvbQ&color=%23800080" target="_blank" class="card-action">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="iframe-container">
+        <iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=1&ctz=Etc%2FGMT&showPrint=0&showNav=0&mode=AGENDA&title=Church%20Event%20&showTitle=0&showTz=0&showTabs=0&showCalendars=0&src=Z2xvcmlvdXNyb3lhbHdvcmRjaXRhZGVsQGdtYWlsLmNvbQ&color=%23800080" style="border-width:0" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+      </div>
+    </div>
+
+
+    <!-- Media Slider Card -->
+    <div class="card wide">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="fas fa-photo-film"></i>
+          <span>MEDIA LIBRARY</span>
+         </div>
+        <a href="https://www.socialcreator.com/skalink/?s=306414" target="_blank" class="card-action">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      <div class="iframe-slider-container">
+        <div class="iframe-slider" id="iframeSlider">
+          <div class="iframe-slide">
+            <div class="iframe-container">
+              <iframe src="https://www.socialcreator.com/skalink/?s=306414" frameborder="0" scrolling="auto"></iframe>
+            </div>
+            <div class="slide-title">VIDEOS</div>
+          </div>
+          <div class="iframe-slide">
+            <div class="iframe-container">
+              <iframe src="https://www.socialcreator.com/skabooks"></iframe>
+            </div>
+            <div class="slide-title">BOOKS</div>
+          </div>
+          <div class="iframe-slide">
+            <div class="iframe-container">
+              <iframe src="https://skatv.cw.center/freedownload/free-audio-downloads/" frameborder="0" scrolling="auto"></iframe>
+            </div>
+            <div class="slide-title">AUDIOS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="#" class="nav-btn active">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="https://skadigitalhub.github.io/NKJVBible/" target="_blank" class="nav-btn">
+      <i class="fas fa-book-bible"></i>
+      <span>Bible</span>
+    </a>
+    <a href="tel:*713*2733%23" class="nav-btn">
+      <i class="fa-solid fa-hand-holding-dollar"></i>
+      <span>Give</span>
+    </a>
+    <a href="https://skadigitalhub.github.io/videochat/" target="_blank" class="nav-btn">
+      <i class="fas fa-comments"></i>
+      <span>Chat</span>
+    </a>
+    <a href="#" class="nav-btn" id="moreBtn">
+      <i class="fas fa-ellipsis-h"></i>
+      <span>More</span>
+    </a>
+  </nav>
+
+  <!-- Animated More Menu Popup -->
+  <div class="more-menu" id="moreMenu">
+    <a href="https://skadigitalhub.github.io/skanote/" target="_blank">
+      <i class="fas fa-edit"></i>
+      <span>Notes</span>
+    </a>
+    <a href="https://www.socialcreator.com/skalink/?s=306352" target="_blank">
+      <i class="fas fa-hands-praying"></i>
+      <span>Fellowship</span>
+    </a>
+    <a href="https://calendar.app.google/ByELE5hqVCBJBM1W8" target="_blank">
+      <i class="fas fa-calendar-check"></i>
+      <span>Appointment</span>
+    </a>
+    <a href="https://skadigitalhub.github.io/bookshelf/" target="_blank">
+      <i class="fas fa-book-open"></i>
+      <span>Library</span>
+    </a>
+  </div>
+
+  <script>
+    // Toggle dark/light mode
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+      const icon = document.querySelector('.theme-toggle i');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+      }
+    }
+
+    // Enhanced More Menu Toggle
+    const moreBtn = document.getElementById('moreBtn');
+    const moreMenu = document.getElementById('moreMenu');
+    
+    moreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      moreMenu.classList.toggle('show');
+    });
+    
+    // Close menu when clicking anywhere else
+    document.addEventListener('click', function() {
+      moreMenu.classList.remove('show');
+    });
+    
+    // Prevent menu from closing when clicking inside it
+    moreMenu.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+
+    // Iframe slider functionality
+    let slider = document.getElementById("iframeSlider");
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    slider.addEventListener("mousedown", (e) => {
+      isDown = true;
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener("mouseleave", () => {
+      isDown = false;
+    });
+
+    slider.addEventListener("mouseup", () => {
+      isDown = false;
+    });
+
+    slider.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch events for mobile
+    slider.addEventListener("touchstart", (e) => {
+      isDown = true;
+      startX = e.touches[0].pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener("touchend", () => {
+      isDown = false;
+    });
+
+    slider.addEventListener("touchmove", (e) => {
+      if (!isDown) return;
+      const x = e.touches[0].pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    });
+  </script>
+</body>
+</html> 
