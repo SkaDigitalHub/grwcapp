@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRWC Audio Playerlist</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Glassy Container */
+    .audio-player {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Album Art */
+    .album-art {
+      width: 150px;
+      height: 150px;
+      border-radius: 15px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .album-art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Track Info */
+    .track-info {
+      margin-bottom: 20px;
+    }
+
+    .track-info h2 {
+      font-size: 1.5em;
+      margin: 0;
+    }
+
+    .track-info p {
+      font-size: 0.9em;
+      color: #bbb;
+      margin: 5px 0;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      position: relative;
+      margin-bottom: 10px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6f61, #ffcc00);
+      width: 0%;
+      border-radius: 5px;
+      transition: width 0.1s linear;
+    }
+
+    /* Time Display */
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8em;
+      color: #bbb;
+      margin-bottom: 20px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .controls button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: transform 0.2s, color 0.2s;
+    }
+
+    .controls button:hover {
+      color: #ff6f61;
+      transform: scale(1.2);
+    }
+
+    /* Visualizer */
+    .visualizer {
+      width: 100%;
+      height: 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .visualizer div {
+      width: 10px;
+      background: linear-gradient(180deg, #ff6f61, #ffcc00);
+      border-radius: 5px;
+      animation: visualizer 1s infinite alternate;
+    }
+
+    @keyframes visualizer {
+      0% { height: 10%; }
+      100% { height: 100%; }
+    }
+
+    /* Playlist */
+    .playlist {
+      max-height: 200px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #ff6f61 rgba(255, 255, 255, 0.1);
+    }
+
+    .playlist::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .playlist::-webkit-scrollbar-thumb {
+      background: #ff6f61;
+      border-radius: 4px;
+    }
+
+    .playlist div {
+      padding: 10px;
+      border-radius: 10px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .playlist div:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    .playlist div.playing {
+      background: rgba(255, 111, 97, 0.2);
+      border-left: 3px solid #ff6f61;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 480px) {
+      .audio-player {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="audio-player">
+    <!-- Album Art -->
+    <div class="album-art">
+      <img src="https://via.placeholder.com/150" alt="Album Art" id="albumArt">
+    </div>
+
+    <!-- Track Info -->
+    <div class="track-info">
+      <h2 id="trackTitle">Track Title</h2>
+      <p id="artistName">Artist Name</p>
+      <p id="albumName">Album Name</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+
+    <!-- Time Display -->
+    <div class="time-display">
+      <span id="currentTime">0:00</span>
+      <span id="duration">0:00</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button onclick="shuffle()">🔀</button>
+      <button onclick="prevTrack()">⏮️</button>
+      <button onclick="togglePlay()">▶️</button>
+      <button onclick="nextTrack()">⏭️</button>
+      <button onclick="repeat()">🔁</button>
+    </div>
+
+    <!-- Visualizer -->
+    <div class="visualizer">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+
+    <!-- Playlist -->
+    <div class="playlist">
+      <div data-src="https://od.lk/s/ODlfMjk2MzQ3ODNf/Understanding%20Dreams-Stephen%20Kpodo%20A_04-12-23_18-26-04-622.mp3" 
+           data-title="Understanding Dreams"
+           data-artist="Prophet Stephen Kpodo A." 
+           data-album="PIC • 2023" 
+           data-image="https://od.lk/s/ODlfMzI0MjQ3NzNf/Glorious.png" 
+           class="playing">
+        Understanding Dreams
+      </div>
+      <div data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" 
+           data-title="SoundHelix Song 2" 
+           data-artist="SoundHelix" 
+           data-album="SoundHelix Album 2" 
+           data-image="myimg/Grwcpage.png">
+        SoundHelix Song 2
+      </div>
+      <div data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" 
+           data-title="SoundHelix Song 3" 
+           data-artist="SoundHelix" 
+           data-album="SoundHelix Album 3" 
+           data-image="myimg/grwc.png">
+        SoundHelix Song 3
+      </div>
+      <div data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" 
+           data-title="SoundHelix Song 4" 
+           data-artist="SoundHelix" 
+           data-album="SoundHelix Album 4" 
+           data-image="https://via.placeholder.com/150">
+        SoundHelix Song 4
+      </div>
+      <div data-src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" 
+           data-title="SoundHelix Song 5" 
+           data-artist="SoundHelix" 
+           data-album="SoundHelix Album 5" 
+           data-image="https://via.placeholder.com/150">
+        SoundHelix Song 5
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Audio Player Logic
+    const audio = new Audio();
+    const progressBar = document.querySelector('.progress');
+    const progressContainer = document.querySelector('.progress-bar');
+    const playlistItems = document.querySelectorAll('.playlist div');
+    const trackTitle = document.getElementById('trackTitle');
+    const artistName = document.getElementById('artistName');
+    const albumName = document.getElementById('albumName');
+    const albumArt = document.getElementById('albumArt');
+    const currentTimeDisplay = document.getElementById('currentTime');
+    const durationDisplay = document.getElementById('duration');
+    let isPlaying = false;
+    let isDragging = false;
+
+    // Function to load and play a track
+    function loadTrack(src, title, artist, album, image) {
+      audio.src = src;
+      audio.play();
+      isPlaying = true;
+      document.querySelector('.controls button:nth-child(3)').textContent = '⏸️';
+
+      // Update track info
+      trackTitle.textContent = title;
+      artistName.textContent = artist;
+      albumName.textContent = `${album}`;
+      albumArt.src = image;
+
+      // Update duration display
+      audio.addEventListener('loadedmetadata', () => {
+        durationDisplay.textContent = formatTime(audio.duration);
+      });
+
+      // Restore playback position if available
+      const savedPosition = localStorage.getItem(src);
+      if (savedPosition) {
+        audio.currentTime = parseFloat(savedPosition);
+      }
+    }
+
+    // Format time to mm:ss
+    function formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = Math.floor(time % 60);
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    // Update Progress Bar and Time Display
+    audio.addEventListener('timeupdate', () => {
+      if (!isDragging) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+        currentTimeDisplay.textContent = formatTime(audio.currentTime);
+      }
+    });
+
+    // Save playback position on pause or track change
+    audio.addEventListener('pause', () => {
+      localStorage.setItem(audio.src, audio.currentTime);
+    });
+
+    // Play/Pause Toggle
+    function togglePlay() {
+      if (isPlaying) {
+        audio.pause();
+        document.querySelector('.controls button:nth-child(3)').textContent = '▶️';
+      } else {
+        audio.play();
+        document.querySelector('.controls button:nth-child(3)').textContent = '⏸️';
+      }
+      isPlaying = !isPlaying;
+    }
+
+    // Next Track
+    function nextTrack() {
+      const currentTrack = document.querySelector('.playlist .playing');
+      const nextTrack = currentTrack.nextElementSibling || playlistItems[0]; // Loop to first track if at end
+      currentTrack.classList.remove('playing');
+      nextTrack.classList.add('playing');
+      loadTrack(
+        nextTrack.getAttribute('data-src'),
+        nextTrack.getAttribute('data-title'),
+        nextTrack.getAttribute('data-artist'),
+        nextTrack.getAttribute('data-album'),
+        nextTrack.getAttribute('data-image')
+      );
+    }
+
+    // Previous Track
+    function prevTrack() {
+      const currentTrack = document.querySelector('.playlist .playing');
+      const prevTrack = currentTrack.previousElementSibling || playlistItems[playlistItems.length - 1]; // Loop to last track if at start
+      currentTrack.classList.remove('playing');
+      prevTrack.classList.add('playing');
+      loadTrack(
+        prevTrack.getAttribute('data-src'),
+        prevTrack.getAttribute('data-title'),
+        prevTrack.getAttribute('data-artist'),
+        prevTrack.getAttribute('data-album'),
+        prevTrack.getAttribute('data-image')
+      );
+    }
+
+    // Shuffle
+    function shuffle() {
+      const tracks = Array.from(playlistItems);
+      tracks.sort(() => Math.random() - 0.5);
+      const playlist = document.querySelector('.playlist');
+      playlist.innerHTML = '';
+      tracks.forEach(track => playlist.appendChild(track));
+      console.log('Playlist Shuffled');
+    }
+
+    // Repeat
+    function repeat() {
+      audio.loop = !audio.loop;
+      console.log(audio.loop ? 'Repeat On' : 'Repeat Off');
+    }
+
+    // Highlight Playing Track in Playlist
+    playlistItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        playlistItems.forEach(i => i.classList.remove('playing'));
+        item.classList.add('playing');
+        loadTrack(
+          item.getAttribute('data-src'),
+          item.getAttribute('data-title'),
+          item.getAttribute('data-artist'),
+          item.getAttribute('data-album'),
+          item.getAttribute('data-image')
+        );
+      });
+    });
+
+    // Seek functionality
+    progressContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      seek(e);
+    });
+
+    progressContainer.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        seek(e);
+      }
+    });
+
+    progressContainer.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    function seek(e) {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    }
+
+    // Load the first track by default
+    const firstTrack = playlistItems[0];
+    loadTrack(
+      firstTrack.getAttribute('data-src'),
+      firstTrack.getAttribute('data-title'),
+      firstTrack.getAttribute('data-artist'),
+      firstTrack.getAttribute('data-album'),
+      firstTrack.getAttribute('data-image')
+    );
+  </script>
+</body>
+</html> 
