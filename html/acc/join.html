@@ -1,0 +1,218 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            backdrop-filter: blur(10px);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+            width: 350px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h2 {
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: white;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff4b2b, #ff416c);
+        }
+
+        .message {
+            margin-top: 10px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .contact-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .contact-group select {
+            width: 35%;
+        }
+
+        .contact-group input {
+            width: 65%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Join Us</h2>
+        <form id="joinForm">
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            
+            <div class="contact-group">
+                <select id="contactCode" required></select>
+                <input type="text" id="contact" placeholder="Phone Number" required>
+            </div>
+
+            <input type="date" id="dob" required>
+            
+            <select id="gender" required>
+                <option value="" disabled selected>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+
+            <input type="text" id="location" placeholder="Location" required>
+
+            <select id="country" required></select>
+
+            <textarea id="reason" placeholder="Reason for Joining" rows="3" required></textarea>
+            
+            <button type="submit">Submit</button>
+            <div class="message" id="message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            populateCountriesAndCodes();
+        });
+
+        function populateCountriesAndCodes() {
+            const countrySelect = document.getElementById("country");
+            const contactCodeSelect = document.getElementById("contactCode");
+
+            const countryList = [
+                { name: "Ghana", code: "+233" },
+                { name: "United States", code: "+1" },
+                { name: "United Kingdom", code: "+44" },
+                { name: "India", code: "+91" },
+                { name: "Australia", code: "+61" },
+                { name: "Canada", code: "+1" },
+                { name: "Germany", code: "+49" },
+                { name: "France", code: "+33" },
+                { name: "Brazil", code: "+55" },
+                { name: "Japan", code: "+81" },
+                { name: "China", code: "+86" },
+                { name: "South Africa", code: "+27" },
+                { name: "Mexico", code: "+52" },
+                { name: "Russia", code: "+7" },
+                { name: "Italy", code: "+39" },
+                { name: "Spain", code: "+34" },
+                { name: "South Korea", code: "+82" }
+            ];
+
+            countrySelect.innerHTML = '<option value="" disabled selected>Select Country</option>';
+            contactCodeSelect.innerHTML = '';
+
+            countryList.forEach(entry => {
+                let countryOption = document.createElement("option");
+                countryOption.value = entry.name;
+                countryOption.textContent = entry.name;
+                countrySelect.appendChild(countryOption);
+
+                let codeOption = document.createElement("option");
+                codeOption.value = entry.code;
+                codeOption.textContent = `${entry.code} (${entry.name})`;
+                contactCodeSelect.appendChild(codeOption);
+            });
+        }
+
+        document.getElementById("joinForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let fullName = document.getElementById("fullName").value;
+            let contactCode = document.getElementById("contactCode").value;
+            let contact = document.getElementById("contact").value;
+            let dob = document.getElementById("dob").value;
+            let gender = document.getElementById("gender").value;
+            let location = document.getElementById("location").value;
+            let country = document.getElementById("country").value;
+            let reason = document.getElementById("reason").value;
+
+            if (!fullName || !contactCode || !contact || !dob || !gender || !location || !country || !reason) {
+                document.getElementById("message").innerText = "Please fill all fields.";
+                return;
+            }
+
+            let formData = {
+                action: "submit",
+                fullName: fullName,
+                contactCode: contactCode,
+                contact: contact,
+                dob: dob,
+                gender: gender,
+                location: location,
+                country: country,
+                reason: reason
+            };
+
+            fetch("https://script.google.com/macros/s/AKfycbzuN8KYScha7JNzSVxG4ZIyOaP9EAT4IIzApC4r96HxD4y5RhCvt3Py3eoNF8pu6z18cQ/exec", {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            }).then(() => {
+                document.getElementById("message").innerText = "Form submitted successfully!";
+                document.getElementById("joinForm").reset();
+            }).catch(error => {
+                document.getElementById("message").innerText = "Error submitting form.";
+            });
+        });
+    </script>
+
+</body>
+</html>
