@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>24/7 TV Station - Weekly Program</title>
+        <style>
+            /* Previous styles remain the same */
+            body {
+                text-align: center;
+                font-family: 'Poppins', sans-serif;
+                background-color: #121212;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0;
+                padding: 0;
+            }
+
+            h2 {
+                font-size: 24px;
+                margin: 20px 0;
+            }
+
+            /* Add clock styles */
+            .clock-container {
+                background: rgba(30, 30, 30, 0.8);
+                padding: 10px 20px;
+                border-radius: 8px;
+                margin: 10px 0;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .time {
+                font-size: 24px;
+                font-weight: bold;
+                color: #ff9f43;
+            }
+
+            .date {
+                font-size: 18px;
+                color: #fff;
+            }
+
+            /* Rest of the previous styles */
+            .video-container {
+                width: 80%;
+                max-width: 900px;
+                position: relative;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #000;
+                box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.2);
+            }
+
+        .scrolling-text-container {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: rgba(0, 0, 255, 0.5);
+            overflow: hidden;
+        }
+
+        .scrolling-text {
+            position: absolute;
+            white-space: nowrap;
+            animation: scroll 60s linear infinite;
+            color: white;
+            font-size: 12px;
+            line-height: 30px;
+            padding-left: 0px;
+        }
+
+        .logo {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 30px;
+            width: auto;
+            z-index: 1;
+            background-color: black;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); } /* Start off-screen right */
+            100% { transform: translateX(-100%); } /* Move off-screen left */
+        }
+
+
+            iframe {
+                width: 100%;
+                height: 500px;
+                border: none;
+            }
+
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                border: none;
+                border-radius: 5px;
+                background: linear-gradient(45deg, #ff512f, #dd2476);
+                color: white;
+                transition: 0.3s;
+            }
+
+            button:hover {
+                background: linear-gradient(45deg, #dd2476, #ff512f);
+            }
+
+            .schedule {
+                width: 80%;
+                max-width: 900px;
+                background: #1e1e1e;
+                padding: 15px;
+                border-radius: 10px;
+                margin-top: 15px;
+                box-shadow: 0px 5px 15px rgba(255, 255, 255, 0.1);
+            }
+
+            .schedule h3 {
+                margin-bottom: 10px;
+                font-size: 18px;
+                color: #ff9f43;
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            li {
+                padding: 10px;
+                border-bottom: 1px solid #444;
+                font-size: 16px;
+            }
+
+            li:last-child {
+                border-bottom: none;
+            }
+
+            @media (max-width: 768px) {
+                iframe {
+                    height: 300px;
+                }
+                .schedule {
+                    width: 90%;
+                }
+                .clock-container {
+                    flex-direction: column;
+                    gap: 5px;
+                    padding: 8px 15px;
+                }
+                .time {
+                    font-size: 20px;
+                }
+                .date {
+                    font-size: 16px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h2>📺 24/7 TV Station - Weekly Program</h2>
+
+        <!-- Add clock container -->
+        <div class="clock-container">
+            <div class="time" id="current-time">00:00:00</div>
+            <div class="date" id="current-date">Loading...</div>
+        </div>
+
+        <div class="video-container">
+            <iframe id="videoFrame" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="scrolling-text-container">
+                <img src="grwc.png" alt="GRWC Tv" class="logo">
+                <div class="scrolling-text">
+                    Welcome to GRWC Tv! Here we transmit the Experience of His Presence Glory and Revelation to the Gathering of men! Stay tune as you Experience The Lord JESUS to be transformed into a king of the word...
+                </div>
+            </div>
+        </div>
+
+        <div class="controls"></div>
+            <button onclick="skipVideo()">Skip Video ⏭️</button>
+        </div>
+
+        <div class="schedule">
+            <h3>Now Playing: <span id="nowPlaying">Loading...</span></h3>
+            <h3>Upcoming Schedule:</h3>
+            <ul id="scheduleList"></ul>
+        </div>
+
+        <script>
+const videoSchedule = [
+    // Monday
+            { day: "Monday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1&controls=0&modestbranding=0&showinfo=0&rel=0" },
+            { day: "Monday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Monday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Monday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Monday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/09CluI_qHcU?enablejsapi=1" },
+            { day: "Monday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Monday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Monday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Monday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Monday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Monday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Monday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1&controls=0&modestbranding=0&showinfo=0&rel=0" },
+            { day: "Monday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/live_stream?channel=UCPrjA8j5tqOT83IYVrHpPYw" },
+            { day: "Monday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Monday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Monday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Monday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Monday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Monday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?enablejsapi=1&controls=0&modestbranding=1&showinfo=0&rel=0" },
+            { day: "Monday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf&controls=0&modestbranding=1&showinfo=0&rel=0" },
+            { day: "Monday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Monday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Monday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Monday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Tuesday
+            { day: "Tuesday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Tuesday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Tuesday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Tuesday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Tuesday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Tuesday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Tuesday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Tuesday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Tuesday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Tuesday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Tuesday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Tuesday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1" },
+            { day: "Tuesday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Tuesday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Tuesday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Tuesday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Tuesday", time: "16:45", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Tuesday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Tuesday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Tuesday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Tuesday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Tuesday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Tuesday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Tuesday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Wednesday
+            { day: "Wednesday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Wednesday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Wednesday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Wednesday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Wednesday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Wednesday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Wednesday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Wednesday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Wednesday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Wednesday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Wednesday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Wednesday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1" },
+            { day: "Wednesday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Wednesday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Wednesday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Wednesday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Wednesday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Wednesday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Wednesday", time: "17:25", title: "Break", video: "https://www.youtube.com/embed/bXKRNkJpdFw?enablejsapi=1" },
+            { day: "Wednesday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Wednesday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Wednesday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Wednesday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Wednesday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Wednesday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Thursday
+            { day: "Thursday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Thursday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Thursday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Thursday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Thursday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Thursday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Thursday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Thursday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Thursday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Thursday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Thursday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Thursday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1" },
+            { day: "Thursday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Thursday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Thursday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Thursday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Thursday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Thursday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Thursday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Thursday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Thursday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Thursday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Thursday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Thursday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Friday
+            { day: "Friday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Friday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Friday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Friday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Friday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Friday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Friday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Friday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Friday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Friday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Friday", time: "12:15", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Friday", time: "12:23", title: "JESUS The Christ", video: "https://www.youtube.com/embed/-Td05XH0TDg?enablejsapi=1&rel=0&controls=0&modestbranding=0" },
+            { day: "Friday", time: "12:30", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Friday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Friday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Friday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Friday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Friday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Friday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Friday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Friday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Friday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Friday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Friday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Saturday
+            { day: "Saturday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Saturday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Saturday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Saturday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Saturday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Saturday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Saturday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Saturday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Saturday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Saturday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Saturday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Saturday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1" },
+            { day: "Saturday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Saturday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Saturday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Saturday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Saturday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Saturday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Saturday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Saturday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Saturday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Saturday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Saturday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Saturday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+
+            // Sunday
+            { day: "Sunday", time: "00:00", title: "Midnight Show", video: "https://www.youtube.com/embed/jjAi1hww2C8?enablejsapi=1" },
+            { day: "Sunday", time: "01:00", title: "Sleep Well", video: "https://www.youtube.com/embed/mr_1FD4VVnU?enablejsapi=1" },
+            { day: "Sunday", time: "02:00", title: "Church History", video: "https://www.youtube.com/embed/xFIXMM1KWyc?enablejsapi=1" },
+            { day: "Sunday", time: "03:00", title: "Faith-tainment", video: "https://www.youtube.com/embed/XPB_GDg9qnk?enablejsapi=1" },
+            { day: "Sunday", time: "04:00", title: "Craft Ideas", video: "https://www.youtube.com/embed/7Twkqyyromk?enablejsapi=1" },
+            { day: "Sunday", time: "05:00", title: "Marriage Counsel", video: "https://www.youtube.com/embed/BXEbV_XQGAU?enablejsapi=1" },
+            { day: "Sunday", time: "06:00", title: "Morning News", video: "https://www.youtube.com/embed/MnCQadLE-xE?enablejsapi=1" },
+            { day: "Sunday", time: "07:00", title: "Worship Time", video: "https://www.youtube.com/embed/lJfWmv3eM7c?enablejsapi=1" },
+            { day: "Sunday", time: "08:00", title: "Exhortation", video: "https://www.youtube.com/embed/HZhoQDSkfvs?enablejsapi=1" },
+            { day: "Sunday", time: "09:00", title: "Word Experience", video: "https://www.youtube.com/embed/13oU_Pd2xO0?enablejsapi=1" },
+            { day: "Sunday", time: "10:00", title: "Morning Praise", video: "https://www.youtube.com/embed/rOmTINlRhxM?enablejsapi=1" },
+            { day: "Sunday", time: "11:00", title: "JESUS The Christ", video: "https://www.youtube.com/embed/1x8MRvpoAc8?enablejsapi=1" },
+            { day: "Sunday", time: "12:00", title: "Noon Live Stream", video: "https://www.youtube.com/embed/ozEmMHV4eYk?enablejsapi=1" },
+            { day: "Sunday", time: "13:00", title: "Cartoons", video: "https://www.youtube.com/embed/edJF8GBB7H0?enablejsapi=1" },
+            { day: "Sunday", time: "14:00", title: "Animal Kingdom", video: "https://www.youtube.com/embed/x5MkVTvOViQ?enablejsapi=1" },
+            { day: "Sunday", time: "15:00", title: "Praises Time", video: "https://www.youtube.com/embed/TMQCevlN8co?enablejsapi=1" },
+            { day: "Sunday", time: "16:00", title: "The Ocean", video: "https://www.youtube.com/embed/Ceww6yLijFc?enablejsapi=1" },
+            { day: "Sunday", time: "17:00", title: "Movie", video: "https://www.youtube.com/embed/5nLY9otsV9M?enablejsapi=1" },
+            { day: "Sunday", time: "18:00", title: "Kingdom News", video: "https://www.youtube.com/embed/CG2XDTgvZPo?si=PbARiFC0DgnSC35z" },
+            { day: "Sunday", time: "19:00", title: "Live Movies", video: "https://www.youtube.com/embed/rvpUMFl7ckE?si=gLTLf1o0ThemtBTf" },
+            { day: "Sunday", time: "20:00", title: "Prophetic Ministrations", video: "https://www.youtube.com/embed/w3jlBZIOtNE?enablejsapi=1" },
+            { day: "Sunday", time: "21:00", title: "Financial Literacy", video: "https://www.youtube.com/embed/ryUrhszOQ9Q?enablejsapi=1" },
+            { day: "Sunday", time: "22:00", title: "Apokalupsis", video: "https://www.youtube.com/embed/3IiM2S-Lg68?enablejsapi=1" },
+            { day: "Sunday", time: "23:00", title: "Priesthood", video: "https://www.youtube.com/embed/XAziCeojOcM?enablejsapi=1" },
+        ];
+
+let currentIndex = 0;
+let player;
+
+function updateClock() {
+    const now = new Date();
+    
+    // Update time
+    const time = now.toLocaleTimeString('en-US', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('current-time').textContent = time;
+    
+    // Update date
+    const date = now.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    document.getElementById('current-date').textContent = date;
+}
+
+setInterval(updateClock, 1000);
+updateClock(); // Initial call
+
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('videoFrame', {
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    playScheduledVideo();
+    updateSchedule();
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        // When the video ends, play the next scheduled video
+        skipVideo();
+    }
+}
+
+function getCurrentTime() {
+    const now = new Date();
+    return now.getHours().toString().padStart(2, '0') + ":" + 
+           now.getMinutes().toString().padStart(2, '0');
+}
+
+function getCurrentDay() {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[new Date().getDay()];
+}
+
+function findCurrentVideoIndex() {
+    const currentTime = getCurrentTime();
+    const currentDay = getCurrentDay();
+    
+    // Find the index of the current video based on the current day and time
+    for (let i = 0; i < videoSchedule.length; i++) {
+        if (videoSchedule[i].day === currentDay && videoSchedule[i].time === currentTime) {
+            return i;
+        }
+    }
+    
+    // If no video is found for the current time, find the next video
+    for (let i = 0; i < videoSchedule.length; i++) {
+        if (videoSchedule[i].day === currentDay && videoSchedule[i].time > currentTime) {
+            return i;
+        }
+    }
+    
+    // If no video is found for the current day, start from the first video of the next day
+    const nextDayIndex = (new Date().getDay() + 1) % 7;
+    const nextDay = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][nextDayIndex];
+    for (let i = 0; i < videoSchedule.length; i++) {
+        if (videoSchedule[i].day === nextDay) {
+            return i;
+        }
+    }
+    
+    return 0; // Default to the first video if no match is found
+}
+
+function playScheduledVideo() {
+    const newIndex = findCurrentVideoIndex();
+    currentIndex = newIndex;
+    loadVideo(videoSchedule[currentIndex].video);
+    updateNowPlaying(currentIndex);
+}
+
+function skipVideo() {
+    currentIndex = (currentIndex + 1) % videoSchedule.length;
+    loadVideo(videoSchedule[currentIndex].video);
+    updateNowPlaying(currentIndex);
+}
+
+function loadVideo(videoUrl) {
+    if (player && player.loadVideoByUrl) {
+        player.loadVideoByUrl({ mediaContentUrl: videoUrl });
+    } else {
+        document.getElementById("videoFrame").src = videoUrl;
+    }
+}
+
+function updateNowPlaying(index) {
+    const current = videoSchedule[index];
+    document.getElementById("nowPlaying").textContent = 
+        `${current.day} - ${current.title}`;
+}
+
+function updateSchedule() {
+    const scheduleList = document.getElementById("scheduleList");
+    scheduleList.innerHTML = "";
+    const currentDay = getCurrentDay();
+    
+    videoSchedule
+        .filter(v => v.day === currentDay)
+        .forEach(v => {
+            const li = document.createElement("li");
+            li.textContent = `${v.time} - ${v.title}`;
+            scheduleList.appendChild(li);
+        });
+}
+
+function checkSchedule() {
+    const currentTime = getCurrentTime();
+    const currentDay = getCurrentDay();
+
+    // Find the index of the video that should be playing now
+    const newIndex = findCurrentVideoIndex();
+
+    // If the new index is different from the current index, switch to the new video
+    if (newIndex !== currentIndex) {
+        currentIndex = newIndex;
+        loadVideo(videoSchedule[currentIndex].video);
+        updateNowPlaying(currentIndex);
+    }
+}
+
+// Call checkSchedule every second
+setInterval(checkSchedule, 60000);
+
+function init() {
+    const currentIndex = findCurrentVideoIndex();
+    loadVideo(videoSchedule[currentIndex].video);
+    updateSchedule();
+    updateNowPlaying(currentIndex);
+}
+
+init();
+        </script>
+    </body>
+</html> 
