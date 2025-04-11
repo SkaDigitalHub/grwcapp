@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRWC Digital Book Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+        }
+
+        input {
+            width: 300px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        input:focus {
+            box-shadow: 0px 4px 12px rgba(255, 255, 255, 0.5);
+        }
+
+        .library-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .book-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .book-details {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .book-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .book-author {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .book-year {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90%;
+            height: 80%;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #f00;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>GRWC Digital Book Library</h1>
+    <input type="text" id="search-bar" placeholder="Search for a book...">
+
+    <div class="library-container" id="library">
+        <!-- Books will be dynamically added here -->
+    </div>
+
+    <!-- Modal for Book Reader -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <iframe id="pdf-viewer" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        const books = [
+            { title: "Hagah", author: "Stephen Kpodo A.", year: 2018, cover: "https://od.lk/s/ODlfMzI0MzA5OTFf/Picsart_25-03-15_05-39-55-680.png", pdf: "https://drive.google.com/file/d/1ePOepnzTjBMG9CTXN1wCrq55KKplGUid/preview" },
+            { title: "The Devotional", author: "Stephen Kpodo A.", year: 2020, cover: "https://skatv.cw.center/wp-content/uploads/sites/3957/2020/11/20201105_121530.png", pdf: "https://drive.google.com/file/d/1r-CbUdf_Ao3jXyN6UiwyZui-mWnFYYg8/preview" },
+            { title: "Total Money Makeover", author: "Dave Ramsey", year: 2003, cover: "https://www.newtonbookshop.com/static/media/media/5349e6bb-f43d-4986-8728-082c9f1a59e6_bookimages.webp", pdf: "https://drive.google.com/file/d/1LJuiCNDuTj14cuEwEiVrxL7CvMaLgBmH/preview" }
+        ];
+
+        const library = document.getElementById('library');
+        const modal = document.getElementById('modal');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const searchBar = document.getElementById('search-bar');
+
+        function displayBooks(filteredBooks) {
+            library.innerHTML = "";
+            filteredBooks.forEach(book => {
+                const bookCard = document.createElement('div');
+                bookCard.classList.add('book-card');
+                bookCard.innerHTML = `
+                    <img src="${book.cover}" alt="Book Cover" class="book-cover">
+                    <div class="book-details">
+                        <p class="book-title">${book.title}</p>
+                        <p class="book-author">by ${book.author}</p>
+                        <p class="book-year">${book.year}</p>
+                    </div>
+                `;
+                bookCard.onclick = () => openBook(book.pdf);
+                library.appendChild(bookCard);
+            });
+        }
+
+        function openBook(pdf) {
+            pdfViewer.src = pdf;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            pdfViewer.src = "";
+        }
+
+        searchBar.addEventListener('input', () => {
+            const searchTerm = searchBar.value.toLowerCase();
+            const filteredBooks = books.filter(book =>
+                book.title.toLowerCase().includes(searchTerm) || 
+                book.author.toLowerCase().includes(searchTerm)
+            );
+            displayBooks(filteredBooks);
+        });
+
+        displayBooks(books);
+    </script>
+</body>
+</html> 
