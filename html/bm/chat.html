@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Video Chat App</title>
+  <!-- Add Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Glass Morphism Effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Main Container */
+    .container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* User List */
+    #user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: rgba(0, 123, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-avatar.group {
+      background-color: rgba(40, 167, 69, 0.8);
+    }
+
+    /* Chat Window */
+    #chat-window {
+      flex: 1;
+      height: 500px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Date Header */
+    .date-header {
+      text-align: center;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+      border-radius: 10px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Message Bubbles */
+    #chat-window div.message {
+      max-width: 90%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sender's Messages */
+    #chat-window div[data-sender="true"] {
+      background-color: rgba(0, 123, 255, 0.8);
+      color: #fff;
+      align-self: flex-end;
+    }
+
+    /* Receiver's Messages */
+    #chat-window div[data-sender="false"] {
+      background-color: rgba(233, 236, 239, 0.8);
+      color: #333;
+      align-self: flex-start;
+    }
+
+    /* Message Time */
+    .message-time {
+      font-size: 8px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 5px;
+      text-align: right;
+    }
+
+    /* Message Input Area */
+    #message-input {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    #message {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      color: #fff;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #message::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #message:focus {
+      border-color: rgba(0, 123, 255, 0.8);
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Send Button */
+    button {
+      padding: 10px 20px;
+      background-color: rgba(0, 123, 255, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: rgba(0, 86, 179, 0.8);
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Video Call Button */
+    .video-call-btn {
+      padding: 10px 15px;
+      background-color: rgba(220, 53, 69, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-call-btn:hover {
+      background-color: rgba(200, 35, 51, 0.8);
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Scrollbar Styling */
+    #chat-window::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat-window::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    #chat-window::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    #chat-window::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Theme Selector */
+    #theme-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100px;
+    }
+
+    .theme-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-dot:hover {
+      transform: scale(1.2);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-dot.active {
+      border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #user-list, #theme-selector {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+      }
+
+      #chat-window {
+        width: 92%;
+        height: 480px;
+      }
+
+      #message-input {
+        width: 90%;
+      }
+    }
+
+    /* Theme-specific Styles */
+    .theme-default {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+    }
+
+    .theme-blue {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+    }
+
+    .theme-green {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+    }
+
+    .theme-pink {
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    }
+
+    .theme-dark {
+      background: linear-gradient(135deg, #333, #000);
+    }
+
+    /* Custom Modal for Username Input */
+    #username-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    #username-modal .modal-content {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 300px;
+      text-align: center;
+      animation: slideIn 0.5s ease;
+    }
+
+    #username-modal h2 {
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 20px;
+    }
+
+    #username-modal input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(5px);
+      color: #fff;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #username-modal input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #username-modal input:focus {
+      border-color: rgba(0, 123, 255, 0.8);
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    }
+
+    #username-modal button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: rgba(0, 123, 255, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #username-modal button:hover {
+      background-color: rgba(0, 86, 179, 0.8);
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body class="theme-default">
+  <!-- Username Modal -->
+  <div id="username-modal">
+    <div class="modal-content glass">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="username-input" placeholder="Username" />
+      <button onclick="setUsername()">Enter</button>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- User List -->
+    <div id="user-list">
+      <div class="user-avatar group" data-user="GROUP">GRO</div>
+    </div>
+
+    <!-- Chat Window and Input -->
+    <div style="flex: 1;">
+      <!-- Chat Window -->
+      <div id="chat-window" class="glass"></div>
+
+      <!-- Message Input -->
+      <div id="message-input">
+        <input type="text" id="message" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+        <button class="video-call-btn" onclick="window.open('https://meet.jit.si/GRWCChurchConference', '_blank')">
+          <i class="fas fa-video"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Theme Selector -->
+    <div id="theme-selector">
+      <div class="theme-dot active" data-theme="default" style="background-color: #f4f4f9;"></div>
+      <div class="theme-dot" data-theme="blue" style="background-color: #e3f2fd;"></div>
+      <div class="theme-dot" data-theme="green" style="background-color: #e8f5e9;"></div>
+      <div class="theme-dot" data-theme="purple" style="background-color: #f3e5f5;"></div>
+      <div class="theme-dot" data-theme="dark" style="background-color: #333;"></div>
+    </div>
+  </div>
+
+  <script>
+    const chatWindow = document.getElementById('chat-window');
+    const messageInput = document.getElementById('message');
+    const userList = document.getElementById('user-list');
+    const themeSelector = document.getElementById('theme-selector');
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzvMIpB50e94TqXUELT5aAPVhe4a_O_uYBl2yiaF4TbCICk5Fr61kXeJN-S3CKiZu_8/exec'; // Replace with your Web App URL
+
+    let sender = null;
+    let receiver = null;
+
+    // Show the username modal on page load
+    const usernameModal = document.getElementById('username-modal');
+    const usernameInput = document.getElementById('username-input');
+
+    function setUsername() {
+      sender = usernameInput.value.trim();
+      if (sender) {
+        usernameModal.style.display = 'none';
+        initializeChat();
+      } else {
+        alert("Please enter a valid username.");
+      }
+    }
+
+    function initializeChat() {
+      // Hardcoded list of all users (for demonstration purposes)
+      const allUsers = ["Rev", "Ska", "kinaa", "Eyram", "Yayra", "Stephen", "Diana", sender]; // Don't include the current sender
+
+      // Function to create an avatar for a user
+      function createUserAvatar(username) {
+        const userAvatar = document.createElement('div');
+        userAvatar.className = 'user-avatar';
+        userAvatar.textContent = username.substring(0, 3).toUpperCase(); // Display first three letters
+        userAvatar.setAttribute('data-user', username);
+        userAvatar.addEventListener('click', () => {
+          receiver = username;
+          alert(`You are now chatting with ${receiver}`);
+          fetchMessages();
+        });
+        return userAvatar;
+      }
+
+      // Add all users to the user list
+      allUsers.forEach(user => {
+        if (user !== "GROUP") { // Skip adding "GROUP" again
+          userList.appendChild(createUserAvatar(user));
+        }
+      });
+
+      // Add click event listener to the GROUP avatar
+      const groupAvatar = userList.querySelector('.user-avatar.group');
+      groupAvatar.addEventListener('click', () => {
+        receiver = "GROUP";
+        alert(`You are now chatting with ${receiver}`);
+        fetchMessages();
+      });
+    }
+
+    // Theme Selection
+    const themeDots = document.querySelectorAll('.theme-dot');
+    themeDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        // Remove active class from all dots
+        themeDots.forEach(d => d.classList.remove('active'));
+        // Add active class to the clicked dot
+        dot.classList.add('active');
+        // Set the theme
+        const theme = dot.getAttribute('data-theme');
+        document.body.className = theme ? `theme-${theme}` : 'theme-default';
+      });
+    });
+
+    // Function to format date with month name
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      const day = date.getDate();
+      const month = monthNames[date.getMonth()];
+      const year = date.getFullYear();
+      return `${month} ${day}, ${year}`;
+    }
+
+    function fetchMessages() {
+      if (!receiver) return; // Don't fetch messages if no receiver is selected
+
+      fetch(scriptUrl + '?action=get')
+        .then(response => response.json())
+        .then(data => {
+          const isScrolledToBottom = chatWindow.scrollHeight - chatWindow.clientHeight <= chatWindow.scrollTop + 1;
+
+          chatWindow.innerHTML = '';
+          let lastDate = null;
+
+          data.forEach(row => {
+            if (
+              (row[1] === sender && row[2] === receiver) || // Direct messages
+              (row[1] === receiver && row[2] === sender) || // Direct messages
+              (row[2] === 'GROUP' && receiver === 'GROUP') // Group messages
+            ) {
+              const messageDate = formatDate(row[0]);
+              if (messageDate !== lastDate) {
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'date-header';
+                dateHeader.textContent = messageDate;
+                chatWindow.appendChild(dateHeader);
+                lastDate = messageDate;
+              }
+
+              const message = document.createElement('div');
+              message.className = 'message';
+              message.textContent = `${row[1]}: ${row[3]}`;
+              message.setAttribute('data-sender', row[1] === sender); // Add data-sender attribute
+
+              const messageTime = document.createElement('div');
+              messageTime.className = 'message-time';
+              messageTime.textContent = new Date(row[0]).toLocaleTimeString();
+              message.appendChild(messageTime);
+
+              chatWindow.appendChild(message);
+            }
+          });
+
+          // Scroll to the bottom if the user was already scrolled to the bottom
+          if (isScrolledToBottom) {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+          }
+        });
+    }
+
+    function sendMessage() {
+      if (!receiver) {
+        alert("Please select a user or group to chat with.");
+        return;
+      }
+
+      const message = messageInput.value;
+      if (message) {
+        fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({ sender, receiver, message }),
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              messageInput.value = '';
+              fetchMessages();
+            }
+          })
+          .catch(error => {
+            console.error('Error sending message:', error);
+          });
+      }
+    }
+
+    // Fetch messages every second
+    setInterval(fetchMessages, 1000);
+  </script>
+</body>
+</html> 
