@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iBible App</title>
+  <style>
+    /* CSS Styling */
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      --primary-color: #4a90e2;
+      --hover-color: #357abd;
+      --text-color: #333;
+      --highlight-color: #ffeb3b;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-color);
+    }
+
+    .container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 15px;
+      box-shadow: var(--glass-shadow);
+      padding: 20px;
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .scripture-of-the-day {
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .navigation {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    label {
+      display: block;
+      margin: 5px 0;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    select {
+      width: 150px; /* Smaller width */
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text-color);
+      font-size: 14px; /* Smaller font size */
+      transition: all 0.3s ease;
+    }
+
+    select:hover {
+      border-color: var(--primary-color);
+    }
+
+    .content-display {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .chapter {
+      margin-bottom: 20px;
+    }
+
+    .chapter h2 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .verse {
+      margin-bottom: 10px;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .verse:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .verse.highlighted {
+      background: var(--highlight-color);
+    }
+
+    .verse-text {
+      margin-bottom: 10px; /* Space between text and buttons */
+    }
+
+    .verse-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .verse-actions button {
+      background: var(--primary-color);
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 12px; /* Smaller buttons */
+    }
+
+    .verse-actions button:hover {
+      background: var(--hover-color);
+    }
+
+    .color-picker {
+      display: none;
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px;
+      z-index: 10;
+    }
+
+    .color-picker div {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .color-picker div:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>iBible NKJV</h1>
+    <div class="scripture-of-the-day" id="scripture-of-the-day">
+      Loading Scripture of the Day...
+    </div>
+    <div class="navigation">
+      <div>
+        <label for="book">Select Book:</label>
+        <select id="book"></select>
+      </div>
+      <div>
+        <label for="chapter">Chapter:</label>
+        <select id="chapter"></select>
+      </div>
+    </div>
+    <div class="content-display" id="content-display">
+      <p>Select a book and chapter to display the content.</p>
+    </div>
+  </div>
+
+  <script>
+    // JavaScript Functionality
+    const bookSelect = document.getElementById('book');
+    const chapterSelect = document.getElementById('chapter');
+    const contentDisplay = document.getElementById('content-display');
+    const scriptureOfTheDay = document.getElementById('scripture-of-the-day');
+
+    // Mapping of books to their number of chapters and verses
+    const bibleStructure = [
+      // Old Testament
+      { book: "Genesis", chapters: 50 },
+      { book: "Exodus", chapters: 40 },
+      { book: "Leviticus", chapters: 27 },
+      { book: "Numbers", chapters: 36 },
+      { book: "Deuteronomy", chapters: 34 },
+      { book: "Joshua", chapters: 24 },
+      { book: "Judges", chapters: 21 },
+      { book: "Ruth", chapters: 4 },
+      { book: "1 Samuel", chapters: 31 },
+      { book: "2 Samuel", chapters: 24 },
+      { book: "1 Kings", chapters: 22 },
+      { book: "2 Kings", chapters: 25 },
+      { book: "1 Chronicles", chapters: 29 },
+      { book: "2 Chronicles", chapters: 36 },
+      { book: "Ezra", chapters: 10 },
+      { book: "Nehemiah", chapters: 13 },
+      { book: "Esther", chapters: 10 },
+      { book: "Job", chapters: 42 },
+      { book: "Psalms", chapters: 150 },
+      { book: "Proverbs", chapters: 31 },
+      { book: "Ecclesiastes", chapters: 12 },
+      { book: "Song of Solomon", chapters: 8 },
+      { book: "Isaiah", chapters: 66 },
+      { book: "Jeremiah", chapters: 52 },
+      { book: "Lamentations", chapters: 5 },
+      { book: "Ezekiel", chapters: 48 },
+      { book: "Daniel", chapters: 12 },
+      { book: "Hosea", chapters: 14 },
+      { book: "Joel", chapters: 3 },
+      { book: "Amos", chapters: 9 },
+      { book: "Obadiah", chapters: 1 },
+      { book: "Jonah", chapters: 4 },
+      { book: "Micah", chapters: 7 },
+      { book: "Nahum", chapters: 3 },
+      { book: "Habakkuk", chapters: 3 },
+      { book: "Zephaniah", chapters: 3 },
+      { book: "Haggai", chapters: 2 },
+      { book: "Zechariah", chapters: 14 },
+      { book: "Malachi", chapters: 4 },
+      // New Testament
+      { book: "Matthew", chapters: 28 },
+      { book: "Mark", chapters: 16 },
+      { book: "Luke", chapters: 24 },
+      { book: "John", chapters: 21 },
+      { book: "Acts", chapters: 28 },
+      { book: "Romans", chapters: 16 },
+      { book: "1 Corinthians", chapters: 16 },
+      { book: "2 Corinthians", chapters: 13 },
+      { book: "Galatians", chapters: 6 },
+      { book: "Ephesians", chapters: 6 },
+      { book: "Philippians", chapters: 4 },
+      { book: "Colossians", chapters: 4 },
+      { book: "1 Thessalonians", chapters: 5 },
+      { book: "2 Thessalonians", chapters: 3 },
+      { book: "1 Timothy", chapters: 6 },
+      { book: "2 Timothy", chapters: 4 },
+      { book: "Titus", chapters: 3 },
+      { book: "Philemon", chapters: 1 },
+      { book: "Hebrews", chapters: 13 },
+      { book: "James", chapters: 5 },
+      { book: "1 Peter", chapters: 5 },
+      { book: "2 Peter", chapters: 3 },
+      { book: "1 John", chapters: 5 },
+      { book: "2 John", chapters: 1 },
+      { book: "3 John", chapters: 1 },
+      { book: "Jude", chapters: 1 },
+      { book: "Revelation", chapters: 22 }
+    ];
+
+    // Get or initialize the current verse position
+    let currentVersePosition = JSON.parse(localStorage.getItem('currentVersePosition')) || {
+      bookIndex: 0,
+      chapter: 1,
+      verse: 1,
+      lastUpdated: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    };
+
+    // Check if a new day has passed
+    const today = new Date().toISOString().split('T')[0];
+    if (currentVersePosition.lastUpdated !== today) {
+      // Move to the next verse
+      currentVersePosition.verse++;
+      if (currentVersePosition.verse > 176) { // Assuming max 176 verses per chapter
+        currentVersePosition.verse = 1;
+        currentVersePosition.chapter++;
+        if (currentVersePosition.chapter > bibleStructure[currentVersePosition.bookIndex].chapters) {
+          currentVersePosition.chapter = 1;
+          currentVersePosition.bookIndex++;
+          if (currentVersePosition.bookIndex >= bibleStructure.length) {
+            currentVersePosition.bookIndex = 0; // Loop back to Genesis
+          }
+        }
+      }
+      currentVersePosition.lastUpdated = today;
+      localStorage.setItem('currentVersePosition', JSON.stringify(currentVersePosition));
+    }
+
+    // Fetch Scripture of the Day
+    async function fetchScriptureOfTheDay() {
+      const { bookIndex, chapter, verse } = currentVersePosition;
+      const book = bibleStructure[bookIndex].book;
+      const url = `https://bible-api.com/${book}+${chapter}:${verse}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        scriptureOfTheDay.innerHTML = `
+          <strong>Scripture of the Day (${today}):</strong> ${data.reference} - ${data.text}
+        `;
+      } catch (error) {
+        scriptureOfTheDay.innerHTML = 'Failed to load Scripture of the Day.';
+      }
+    }
+
+    // Initialize Scripture of the Day
+    fetchScriptureOfTheDay();
+
+    // Populate the book dropdown
+    bibleStructure.forEach((bookData, index) => {
+      const option = document.createElement('option');
+      option.value = bookData.book;
+      option.textContent = bookData.book;
+      bookSelect.appendChild(option);
+    });
+
+    // Fetch chapters when a book is selected
+    bookSelect.addEventListener('change', async () => {
+      const book = bookSelect.value;
+      chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+      contentDisplay.innerHTML = '<p>Select a chapter to display the content.</p>';
+
+      // Get the number of chapters for the selected book
+      const bookData = bibleStructure.find(b => b.book === book);
+      const chapters = bookData.chapters;
+
+      // Populate the chapter dropdown
+      for (let i = 1; i <= chapters; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Chapter ${i}`;
+        chapterSelect.appendChild(option);
+      }
+    });
+
+    // Fetch and display chapter content when a chapter is selected
+    chapterSelect.addEventListener('change', async () => {
+      const book = bookSelect.value;
+      const chapter = chapterSelect.value;
+
+      if (book && chapter) {
+        const url = `https://bible-api.com/${book}+${chapter}`;
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          // Display the chapter content
+          contentDisplay.innerHTML = `
+            <div class="chapter">
+              <h2>${book} Chapter ${chapter}</h2>
+              ${data.verses.map(verse => {
+                const verseKey = `${book}|${chapter}|${verse.verse}`;
+                const highlightedColor = localStorage.getItem(verseKey);
+                return `
+                  <div class="verse ${highlightedColor ? 'highlighted' : ''}" data-verse="${verse.verse}" style="background-color: ${highlightedColor || ''}">
+                    <div class="verse-text">
+                      <strong>${verse.verse}:</strong> ${verse.text}
+                    </div>
+                    <div class="verse-actions">
+                      <button onclick="bookmarkVerse('${book}', ${chapter}, ${verse.verse})">Bookmark</button>
+                      <button onclick="showColorPicker(event)">Highlight</button>
+                      <div class="color-picker">
+                        <div style="background: #ffeb3b;" onclick="highlightVerse(event, '#ffeb3b', '${book}', ${chapter}, ${verse.verse})"></div>
+                        <div style="background: #ffccbc;" onclick="highlightVerse(event, '#ffccbc', '${book}', ${chapter}, ${verse.verse})"></div>
+                        <div style="background: #c8e6c9;" onclick="highlightVerse(event, '#c8e6c9', '${book}', ${chapter}, ${verse.verse})"></div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        } catch (error) {
+          contentDisplay.innerHTML = '<p>Error fetching chapter content.</p>';
+        }
+      }
+    });
+
+    // Bookmark a verse
+    function bookmarkVerse(book, chapter, verse) {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+      bookmarks.push({ book, chapter, verse });
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      alert(`Bookmarked ${book} ${chapter}:${verse}`);
+    }
+
+    // Show color picker for highlighting
+    function showColorPicker(event) {
+      const colorPicker = event.target.parentElement.querySelector('.color-picker');
+      colorPicker.style.display = 'block';
+    }
+
+    // Highlight a verse and save it to localStorage
+    function highlightVerse(event, color, book, chapter, verse) {
+      const verseElement = event.target.closest('.verse');
+      verseElement.style.backgroundColor = color;
+
+      // Save the highlighted verse to localStorage
+      const verseKey = `${book}|${chapter}|${verse}`;
+      if (color) {
+        localStorage.setItem(verseKey, color);
+      } else {
+        localStorage.removeItem(verseKey);
+      }
+
+      // Hide the color picker
+      event.target.parentElement.style.display = 'none';
+    }
+  </script>
+</body>
+</html> 
